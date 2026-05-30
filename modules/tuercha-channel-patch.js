@@ -16,9 +16,76 @@
  * 它们不依赖 DOM 与实例状态，便于独立单元测试。
  */
 
+import { NAISettings } from "../ui/settings/nai-settings.js";
 import { ImageGenerator } from "./image-gen.js";
 import { MultiCharacterParser } from "./multi-character-parser.js";
 import { buildTuerchaDrawParams, parseTuerchaResponse } from "./tuercha-draw-params.js";
+import {
+  TUERCHA_CHANNEL_VALUE,
+  deriveChannelUiState,
+  patchNaiSettingsRenderHtml
+} from "./tuercha-ui-patch-helpers.js";
+
+/**
+ * 同步渠道切换后的 URL 与 Proxy Stream 可见性。
+ * Why：原 bindEvents 只把 official 视为特殊值；加入 tuercha 后需要把它也归入“隐藏 Proxy Stream”
+ * 且默认 URL 必须切到空字符串，避免把代理默认值错误带入 NewAPI。
+ * @param {NAISettings} instance NAISettings 实例
+ * @param {HTMLElement} container 设置面板根元素
+ */
+function syncChannelUi(instance, container) {
+  const channelEl = container?.querySelector("#nai-channel");
+  const urlEl = container?.querySelector("#nai-api-url");
+  const proxyGroupEl = container?.querySelector("#nai-proxy-stream-group");
+  if (!channelEl) return;
+
+  const channel = channelEl.value || "proxy";
+  const uiState = deriveChannelUiState(instance, channel, urlEl?.value ?? "");
+  if (proxyGroupEl) {
+    proxyGroupEl.style.display = uiState.proxyDisplay;
+  }
+
+  if (!urlEl) return;
+  urlEl.value = uiState.nextUrl;
+}
+
+/**
+ * 安装 NAISettings 的运行时补丁。
+ * Why：把第三渠道 UI 注入与事件修正放到原型包装层，避免以后继续替换 nai-settings.js。
+ */
+function installNaiSettingsPatch() {
+  if (!NAISettings?.prototype || NAISettings.prototype.__tuerchaUiPatched) return;
+
+  const originalRender = NAISettings.prototype.render;
+  const originalBindEvents = NAISettings.prototype.bindEvents;
+
+  /**
+   * 运行时注入第三渠道到 render 输出。
+   * @returns {string}
+   */
+  NAISettings.prototype.render = function () {
+    const html = originalRender.apply(this, arguments);
+    return patchNaiSettingsRenderHtml(html, this);
+  };
+
+  /**
+   * 追加第三渠道的 UI 同步逻辑。
+   * @param {HTMLElement} container 设置容器
+   */
+  NAISettings.prototype.bindEvents = function (container) {
+    const result = originalBindEvents.apply(this, arguments);
+    const channelEl = container?.querySelector("#nai-channel");
+    if (channelEl) {
+      syncChannelUi(this, container);
+      channelEl.addEventListener("change", () => {
+        syncChannelUi(this, container);
+      });
+    }
+    return result;
+  };
+
+  NAISettings.prototype.__tuerchaUiPatched = true;
+}
 
 /**
  * 规范化 TUERCHA base URL：去尾斜杠；以 /chat/completions 结尾原样；以 /v1 结尾补 /chat/completions；
@@ -201,6 +268,8 @@ async function generateWithTuercha(positivePrompt, negativePrompt, options = {})
     finalNegative: src.negativePrompt
   };
 }
+
+installNaiSettingsPatch();
 
 // —— 原型包装：仅 tuercha 渠道接管，其余委托原方法 ——
 if (ImageGenerator && ImageGenerator.prototype && !ImageGenerator.prototype.__tuerchaPatched) {
