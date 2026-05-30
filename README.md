@@ -1,3 +1,23 @@
+> ## 🔱 Fork 说明
+>
+> 本仓库 Fork 自原项目：[shaochami/chami_tavern-scene-plugin](https://github.com/shaochami/chami_tavern-scene-plugin)
+>
+> ### 本 Fork 的改动
+>
+> 为 NovelAI 模式新增第三个渠道 **「TUERCHA 公益站」**（NewAPI / OpenAI 兼容网关），与原有 `official`（官方）、`proxy`（第三方代理）渠道并存，互不影响。
+>
+> **新增 / 修改的文件：**
+> - `ui/settings/nai-settings.js`：在渠道下拉框新增 `TUERCHA 公益站` 选项，并适配 URL 默认值与流式选项可见性。
+> - `modules/tuercha-channel-patch.js`（新增）：以原型包装方式接管 `generateWithNAI`，**仅当渠道为 `tuercha` 时**走 NewAPI 逻辑，其余渠道原样委托原方法，对 official/proxy/SD/ComfyUI/Other 流程零影响。
+> - `modules/tuercha-draw-params.js`（新增）：TUERCHA 绘图参数映射与校验、响应解析（纯逻辑，含单元测试）。
+> - `tests/`（新增）：单元测试与端到端测试。
+>
+> **功能覆盖**：基础文生图、多角色（坐标 `[A-E][1-5]`）、图生图 i2i、局部重绘 inpaint、Vibe Transfer（controlnet）、人物参考（character_references）、英文提示词校验、尺寸/步数校验等。
+>
+> **使用方式**：在「设置 → 图像生成 → NovelAI」中将渠道选择为 `TUERCHA 公益站`，填写 NewAPI base URL 与 API Key 即可。
+>
+> ---
+
 # [comfyui公益站](http://124.222.73.244:7861/login)
 # [公益云酒馆](http://124.222.73.244:8000)
 # 酒馆场景插件 (Tavern Scene Plugin)

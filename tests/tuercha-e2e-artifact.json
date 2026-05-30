@@ -1,0 +1,62 @@
+{
+  "requestUrl": "https://tuercha.example.com/v1/chat/completions",
+  "requestHeaders": {
+    "Content-Type": "application/json",
+    "Authorization": "Bearer sk-test-KEY"
+  },
+  "requestBody": {
+    "model": "nai-diffusion-4-5-full",
+    "messages": [
+      {
+        "role": "user",
+        "content": "{\"prompt\":\"2girls, masterpiece\",\"size\":[1216,832],\"steps\":23,\"n_samples\":1,\"image_format\":\"png\",\"negative_prompt\":\"lowres\",\"scale\":5,\"sampler\":\"k_euler_ancestral\",\"seed\":42,\"characters\":[{\"prompt\":\"blue hair\",\"position\":\"B2\"},{\"prompt\":\"red hair\",\"position\":\"D4\"}],\"use_coords\":true,\"use_order\":true,\"i2i\":{\"image\":\"BASE64IMG\",\"strength\":0.6,\"noise\":0.1}}"
+      }
+    ],
+    "stream": false,
+    "max_tokens": 100000
+  },
+  "innerDrawParams": {
+    "prompt": "2girls, masterpiece",
+    "size": [
+      1216,
+      832
+    ],
+    "steps": 23,
+    "n_samples": 1,
+    "image_format": "png",
+    "negative_prompt": "lowres",
+    "scale": 5,
+    "sampler": "k_euler_ancestral",
+    "seed": 42,
+    "characters": [
+      {
+        "prompt": "blue hair",
+        "position": "B2"
+      },
+      {
+        "prompt": "red hair",
+        "position": "D4"
+      }
+    ],
+    "use_coords": true,
+    "use_order": true,
+    "i2i": {
+      "image": "BASE64IMG",
+      "strength": 0.6,
+      "noise": 0.1
+    }
+  },
+  "parsedResult": {
+    "success": true,
+    "imageUrl": "data:image/png;base64,iVBORw0KGgoMOCK",
+    "finalPositive": "2girls, masterpiece",
+    "finalNegative": "lowres",
+    "_parsed": {
+      "dataUrl": "data:image/png;base64,iVBORw0KGgoMOCK",
+      "seeds": [
+        987654321
+      ],
+      "vibeCacheIds": []
+    }
+  }
+}
